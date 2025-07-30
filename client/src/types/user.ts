@@ -5,7 +5,7 @@ enum USER_CONNECTION_STATUS {
 
 interface User {
     username: string
-    roomId: string
+    projectId: string
 }
 
 interface RemoteUser extends User {

@@ -16,8 +16,8 @@ const FormComponent = () => {
     const usernameRef = useRef<HTMLInputElement | null>(null)
     const navigate = useNavigate()
 
-    const createNewRoomId = () => {
-        setCurrentUser({ ...currentUser, roomId: uuidv4() })
+    const createNewprojectId = () => {
+        setCurrentUser({ ...currentUser, projectId: uuidv4() })
         toast.success("Created a new Room Id")
         usernameRef.current?.focus()
     }
@@ -32,10 +32,10 @@ const FormComponent = () => {
         if (currentUser.username.trim().length === 0) {
             toast.error("Enter your username")
             return false
-        } else if (currentUser.roomId.trim().length === 0) {
+        } else if (currentUser.projectId.trim().length === 0) {
             toast.error("Enter a room id")
             return false
-        } else if (currentUser.roomId.trim().length < 5) {
+        } else if (currentUser.projectId.trim().length < 5) {
             toast.error("ROOM Id must be at least 5 characters long")
             return false
         } else if (currentUser.username.trim().length < 3) {
@@ -55,14 +55,14 @@ const FormComponent = () => {
     }
 
     useEffect(() => {
-        if (currentUser.roomId.length > 0) return
-        if (location.state?.roomId) {
-            setCurrentUser({ ...currentUser, roomId: location.state.roomId })
+        if (currentUser.projectId.length > 0) return
+        if (location.state?.projectId) {
+            setCurrentUser({ ...currentUser, projectId: location.state.projectId })
             if (currentUser.username.length === 0) {
                 toast.success("Enter your username")
             }
         }
-    }, [currentUser, location.state?.roomId, setCurrentUser])
+    }, [currentUser, location.state?.projectId, setCurrentUser])
 
     useEffect(() => {
         if (status === USER_STATUS.DISCONNECTED && !socket.connected) {
@@ -75,7 +75,7 @@ const FormComponent = () => {
         if (status === USER_STATUS.JOINED && !isRedirect) {
             const username = currentUser.username
             sessionStorage.setItem("redirect", "true")
-            navigate(`/editor/${currentUser.roomId}`, {
+            navigate(`/editor/${currentUser.projectId}`, {
                 state: {
                     username,
                 },
@@ -94,11 +94,11 @@ const FormComponent = () => {
             <form onSubmit={joinRoom} className="flex w-full flex-col gap-4">
                 <input
                     type="text"
-                    name="roomId"
+                    name="projectId"
                     placeholder="Room Id"
                     className="w-full rounded-md border border-gray-500 text-dark px-3 py-3 focus:outline-none"
                     onChange={handleInputChanges}
-                    value={currentUser.roomId}
+                    value={currentUser.projectId}
                 />
                 <input
                     type="text"
@@ -118,7 +118,7 @@ const FormComponent = () => {
             </form>
             <button
                 className="cursor-pointer text-dark select-none underline"
-                onClick={createNewRoomId}
+                onClick={createNewprojectId}
             >
                 Generate Unique Room Id
             </button>

@@ -23,7 +23,7 @@ function AppContextProvider({ children }: { children: ReactNode }) {
     const [status, setStatus] = useState<USER_STATUS>(USER_STATUS.INITIAL)
     const [currentUser, setCurrentUser] = useState<User>({
         username: "",
-        roomId: "",
+        projectId: "",
     })
     const [activityState, setActivityState] = useState<ACTIVITY_STATE>(
         ACTIVITY_STATE.CODING,

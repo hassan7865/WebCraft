@@ -10,7 +10,7 @@ import { RemoteUser } from "@/types/user"
 import {
     findParentDirectory,
     getFileById,
-    initialFileStructure,
+    getInitialFileStructure,
     isFileExist,
 } from "@/utils/file"
 import { saveAs } from "file-saver"
@@ -43,7 +43,7 @@ function FileContextProvider({ children }: { children: ReactNode }) {
     const { setUsers, drawingData } = useAppContext()
 
     const [fileStructure, setFileStructure] =
-        useState<FileSystemItem>(initialFileStructure)
+        useState<FileSystemItem>(getInitialFileStructure)
     const initialOpenFiles = fileStructure.children
         ? fileStructure.children
         : []
@@ -816,8 +816,10 @@ function FileContextProvider({ children }: { children: ReactNode }) {
                 createFile,
                 updateFileContent,
                 renameFile,
+                setFileStructure,
                 deleteFile,
                 downloadFilesAndFolders,
+                setOpenFiles
             }}
         >
             {children}

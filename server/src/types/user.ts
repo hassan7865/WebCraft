@@ -5,7 +5,7 @@ enum USER_CONNECTION_STATUS {
 
 interface User {
 	username: string
-	roomId: string
+	projectId: string
 	status: USER_CONNECTION_STATUS
 	cursorPosition: number
 	typing: boolean

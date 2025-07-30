@@ -1,4 +1,4 @@
-import { useAppContext } from "@/context/AppContext"
+import AppContext, { useAppContext } from "@/context/AppContext"
 import { useFileSystem } from "@/context/FileContext"
 import { useSettings } from "@/context/SettingContext"
 import { useSocket } from "@/context/SocketContext"
@@ -18,10 +18,14 @@ import CodeMirror, {
 import { useEffect, useMemo, useState } from "react"
 import toast from "react-hot-toast"
 import { cursorTooltipBaseTheme, tooltipField } from "./tooltip"
+import { USER_STATUS } from "@/types/user"
+import { useLocation } from "react-router-dom"
 
 function Editor() {
-    const { users, currentUser } = useAppContext()
-    const { activeFile, setActiveFile } = useFileSystem()
+    const { users, currentUser, setStatus } = useAppContext()
+    const location = useLocation()
+    const { activeFile, setActiveFile, fileStructure, setFileStructure } =
+        useFileSystem()
     const { theme, language, fontSize } = useSettings()
     const { socket } = useSocket()
     const { viewHeight } = useResponsive()
@@ -30,26 +34,63 @@ function Editor() {
         () => users.filter((u) => u.username !== currentUser.username),
         [users, currentUser],
     )
+
     const [extensions, setExtensions] = useState<Extension[]>([])
+   
 
     const onCodeChange = (code: string, view: ViewUpdate) => {
         if (!activeFile) return
 
         const file: FileSystemItem = { ...activeFile, content: code }
         setActiveFile(file)
+
         const cursorPosition = view.state?.selection?.main?.head
         socket.emit(SocketEvent.TYPING_START, { cursorPosition })
+
         socket.emit(SocketEvent.FILE_UPDATED, {
             fileId: activeFile.id,
             newContent: code,
         })
+
         clearTimeout(timeOut)
 
-        const newTimeOut = setTimeout(
-            () => socket.emit(SocketEvent.TYPING_PAUSE),
-            1000,
-        )
+        const newTimeOut = setTimeout(() => {
+            const updatedStructure = updateFile(
+                fileStructure,
+                activeFile.id,
+                code,
+            )
+            setFileStructure(updatedStructure)
+
+            socket.emit(SocketEvent.TYPING_PAUSE, {
+                fileStructure: updatedStructure,
+            })
+        }, 1000)
+
         setTimeOut(newTimeOut)
+    }
+
+    const updateFile = (
+        directory: FileSystemItem,
+        fileId: string,
+        newContent: string,
+    ): FileSystemItem => {
+        if (directory.type === "file" && directory.id === fileId) {
+            return {
+                ...directory,
+                content: newContent,
+            }
+        } else if (directory.children && directory.children.length > 0) {
+            return {
+                ...directory,
+                children: directory.children.map((child) =>
+                    updateFile(child, fileId, newContent),
+                ),
+            }
+        } else {
+            // Return unchanged
+            return directory
+        }
     }
 
     // Listen wheel event to zoom in/out and prevent page reload

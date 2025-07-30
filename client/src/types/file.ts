@@ -13,6 +13,7 @@ interface FileSystemItem {
 
 interface FileContext {
     fileStructure: FileSystemItem
+    setFileStructure:(fileSystemItem:FileSystemItem)=>void,
     openFiles: FileSystemItem[]
     activeFile: FileSystemItem | null
     setActiveFile: (file: FileSystemItem) => void
@@ -29,6 +30,8 @@ interface FileContext {
     renameFile: (fileId: Id, newName: FileName) => boolean
     deleteFile: (fileId: Id) => void
     downloadFilesAndFolders: () => void
+    setOpenFiles:(fileSystemItem:FileSystemItem[]) => void
+    
 }
 
 export { FileSystemItem, FileContent, FileContext, Id, FileName }

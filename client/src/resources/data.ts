@@ -1,0 +1,29 @@
+export const avatarList = [
+    {
+      imgUrl:"https://octdailops.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10400",
+    },
+    {
+      imgUrl:"https://octdailops.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10401"
+    },
+    {
+      imgUrl:"https://octdailops.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10402"
+    },
+    {
+      imgUrl:"https://octdailops.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10403"
+    },
+    {
+      imgUrl:"https://octdailops.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10404"
+    },
+    {
+      imgUrl:"https://octdailops.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10405"
+    },
+    {
+      imgUrl:"https://octdailops.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10406"
+    },
+    {
+      imgUrl:"https://octdailops.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407"
+    },
+    {
+      imgUrl:"https://octdailops.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10408"
+    },
+]

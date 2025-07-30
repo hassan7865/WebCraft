@@ -6,20 +6,30 @@ const initialCode = `function sayHi() {
 }
 
 sayHi()`
+export let initialFileStructure: FileSystemItem | null = {
+                    name: "root",
+                    id: uuidv4(),
+                    type: "directory",
+                    children: [
+                        {
+                            id: uuidv4(),
+                            type: "file",
+                            name: "index.js",
+                            content: initialCode,
+                        },
+                    ],
+                };
 
-export const initialFileStructure: FileSystemItem = {
-    name: "root",
-    id: uuidv4(),
-    type: "directory",
-    children: [
-        {
-            id: uuidv4(),
-            type: "file",
-            name: "index.js",
-            content: initialCode,
-        },
-    ],
-}
+export const setInitialFileStructure = (structure: FileSystemItem) => {
+  initialFileStructure = structure;
+};
+
+export const getInitialFileStructure = () => initialFileStructure;
+
+
+
+   
+
 
 export const findParentDirectory = (
     directory: FileSystemItem,

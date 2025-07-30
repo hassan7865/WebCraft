@@ -4,6 +4,7 @@ import { useSocket } from "@/context/SocketContext"
 import { ChatMessage } from "@/types/chat"
 import { SocketEvent } from "@/types/socket"
 import { formatDate } from "@/utils/formateDate"
+import UserState from "@/utils/UserState"
 import { FormEvent, useRef } from "react"
 import { LuSendHorizonal } from "react-icons/lu"
 import { v4 as uuidV4 } from "uuid"
@@ -25,6 +26,7 @@ function ChatInput() {
                 message: inputVal,
                 username: currentUser.username,
                 timestamp: formatDate(new Date().toISOString()),
+                userId:UserState.GetUserData()._id
             }
             socket.emit(SocketEvent.SEND_MESSAGE, { message })
             setMessages((messages) => [...messages, message])
