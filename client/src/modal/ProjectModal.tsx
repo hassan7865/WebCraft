@@ -4,12 +4,6 @@ import { useForm, Controller } from 'react-hook-form'
 import { FiX, FiUser, FiCalendar, FiUsers, FiTarget } from 'react-icons/fi'
 import { Project } from '@/types/project'
 
-// Types
-interface Creator {
-  id: string
-  name: string
-  avatarUrl?: string
-}
 
 export interface ProjectFormData {
   name: string

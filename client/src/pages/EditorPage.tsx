@@ -50,13 +50,12 @@ function EditorPage() {
     }, [])
 
   useEffect(() => {
-    const wasOnEditorPage = location.pathname.startsWith("/editor/");
+
     return () => {
-        if (wasOnEditorPage && !location.pathname.startsWith("/editor/")) {
-            console.log("Disconnected");
+        console.log("Disconnected");
             socket.disconnect();
             setStatus(USER_STATUS.DISCONNECTED);
-        }
+        
     };
 }, [location.pathname]);
 

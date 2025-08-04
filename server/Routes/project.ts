@@ -13,8 +13,7 @@ router.post("/save", async (req: Request, res: Response, next: NextFunction) => 
       return next(throwError(400, "key, ProjectName, and Assignee  are required"));
 
     if (!_id) {
-      const existing = await Project.findOne({ key });
-      if (existing) return next(throwError(400, "Project key already exists"));
+     
 
       const newProject = new Project({ key, name, description, createdBy, avatarUrl,status });
       await newProject.save();

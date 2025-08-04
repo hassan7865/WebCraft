@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import Avatar from "react-avatar"
-import { FiChevronDown, FiLogOut, FiCamera } from "react-icons/fi"
+import { FiChevronDown, FiLogOut, FiCamera, FiClock } from "react-icons/fi"
+import FileEditHistoryComponent from "../history/historyComponent"
 
 interface NavbarProps {
     userName?: string
@@ -16,6 +17,7 @@ const NavbarComponent: React.FC<NavbarProps> = ({
     className = "",
 }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+    const [isHistoryOpen, setisHistoryOpen] = useState(false)
 
     const handleSignOut = () => {
         setIsDropdownOpen(false)
@@ -35,7 +37,7 @@ const NavbarComponent: React.FC<NavbarProps> = ({
                         <div className="flex items-center space-x-4">
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-lg">
                                 <span className="text-sm font-bold text-white">
-                                    {"</>"}
+                                    {"{W}"}
                                 </span>
                             </div>
                             <div className="hidden sm:block">
@@ -48,14 +50,35 @@ const NavbarComponent: React.FC<NavbarProps> = ({
                             </div>
                         </div>
 
-                        {/* Center Section - Search or Navigation could go here */}
-                        <div className="hidden items-center space-x-8 md:flex">
-                            {/* You can add navigation items here */}
-                        </div>
-
                         {/* Right Section */}
                         <div className="flex items-center space-x-4">
                             {/* User Dropdown */}
+
+                            {location.pathname.includes("editor") && (
+                                <div className="relative">
+                                    <button
+                                        onClick={() =>
+                                            setisHistoryOpen(!isHistoryOpen)
+                                        }
+                                        className="group flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-100 hover:text-gray-900"
+                                    >
+                                        <FiClock className="h-4 w-4" />
+                                        <span className="hidden md:inline">
+                                            File History
+                                        </span>
+                                    </button>
+
+                                    {isHistoryOpen && (
+                                        <FileEditHistoryComponent
+                                            
+                                            onClose={() =>
+                                                setisHistoryOpen(false)
+                                            }
+                                        />
+                                    )}
+                                </div>
+                            )}
+
                             <div className="relative">
                                 <button
                                     onClick={() =>

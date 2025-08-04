@@ -4,7 +4,7 @@ import { Navigate, Outlet } from "react-router-dom"
 
 const PrivateRoute = () => {
     const currentUser = UserState.GetUserData()
-    console.log(currentUser)
+   
 
     return currentUser ? (
         <>
@@ -12,7 +12,7 @@ const PrivateRoute = () => {
             <Outlet />
         </>
     ) : (
-        <Navigate to="/auth" replace />
+        <Navigate to="/" replace />
     )
 }
 

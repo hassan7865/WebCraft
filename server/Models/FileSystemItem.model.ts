@@ -4,6 +4,7 @@ export type FileName = string
 export type FileContent = string
 
 export interface IFileTreeNode {
+  id:string,
   name: FileName
   type: "file" | "directory"
   content?: FileContent

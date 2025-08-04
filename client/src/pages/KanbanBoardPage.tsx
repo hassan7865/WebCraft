@@ -76,7 +76,7 @@ const KanbanBoard: React.FC = () => {
 
     const navigate = useNavigate()
 
-    // Filter tasks based on search and filters
+   console.log(tasks)
     const filteredTasks = useMemo(() => {
         return tasks.filter((task) => {
             const matchesSearch =
@@ -90,7 +90,7 @@ const KanbanBoard: React.FC = () => {
                 filterPriority === "all" || task.priority === filterPriority
             const matchesAssignee =
                 filterAssignee === "all" ||
-                task.assignee.username === filterAssignee
+                task.assignee?.username === filterAssignee
 
             return matchesSearch && matchesPriority && matchesAssignee
         })

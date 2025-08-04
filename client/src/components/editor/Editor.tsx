@@ -20,6 +20,7 @@ import toast from "react-hot-toast"
 import { cursorTooltipBaseTheme, tooltipField } from "./tooltip"
 import { USER_STATUS } from "@/types/user"
 import { useLocation } from "react-router-dom"
+import UserState from "@/utils/UserState"
 
 function Editor() {
     const { users, currentUser, setStatus } = useAppContext()
@@ -63,7 +64,7 @@ function Editor() {
             setFileStructure(updatedStructure)
 
             socket.emit(SocketEvent.TYPING_PAUSE, {
-                fileStructure: updatedStructure,
+                fileStructure: updatedStructure,userId:UserState.GetUserData()._id
             })
         }, 1000)
 

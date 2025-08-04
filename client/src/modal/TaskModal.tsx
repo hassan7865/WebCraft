@@ -67,7 +67,7 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
             status: task?.status || "todo",
             summary: task?.summary || "",
             priority: task?.priority || "Normal",
-            assignee: task?.assignee?._id || "", // Extract _id from nested assignee object
+            assignee: task?.assignee?._id || null, // Extract _id from nested assignee object
             dueDate: task?.dueDate ? new Date(task.dueDate) : null,
             tags: task?.tags || [],
             progress: task?.progress || 0,
@@ -86,7 +86,7 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
                 status: task.status,
                 summary: task.summary,
                 priority: task.priority,
-                assignee: task.assignee?._id || "", // Extract _id from nested assignee object
+                assignee: task.assignee?._id || null, // Extract _id from nested assignee object
                 dueDate: task.dueDate ? new Date(task.dueDate) : null,
                 tags: task.tags || [],
                 progress: task.progress || 0,

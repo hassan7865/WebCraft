@@ -15,8 +15,11 @@ import FileSystemItem from "../Models/FileSystemItem.model";
 import mongoose from "mongoose";
 import fileRoute from '../Routes/fileStructure'
 import {ChatMessageModel} from '../Models/Chat.model'
+import {FileEditHistory} from '../Models/FileHistory.model'
 import chatRoute from '../Routes/chat'
 import taskRoute from '../Routes/task' 
+import { FileNode } from "./types/file";
+import otpRoute from '../Routes/otp'
 dotenv.config();
 
 const app = express();
@@ -68,7 +71,6 @@ function getUserBySocketId(socketId: SocketId): User | null {
 io.on("connection", (socket) => {
   // Handle user actions
   socket.on(SocketEvent.JOIN_REQUEST, ({ projectId, username }) => {
-    console.log("ProjectId:",projectId,"Username:",username)
     const isUsernameExist = getUsersInRoom(projectId).filter(
       (u) => u.username === username
     );
@@ -107,6 +109,7 @@ io.on("connection", (socket) => {
     socket.leave(user.projectId);
 
     const remainingUsers: User[] = getUsersInRoom(user.projectId);
+   
     socket.broadcast
       .to(user.projectId)
       .emit(SocketEvent.USER_DISCONNECTED, { users: remainingUsers });
@@ -248,31 +251,156 @@ io.on("connection", (socket) => {
     socket.broadcast.to(projectId).emit(SocketEvent.TYPING_START, { user });
   });
 
-  socket.on(SocketEvent.TYPING_PAUSE, async ({ fileStructure }) => {
-    userSocketMap = userSocketMap.map((user) => {
-      if (user.socketId === socket.id) {
-        return { ...user, typing: false };
+socket.on(SocketEvent.TYPING_PAUSE, async ({ fileStructure, userId }) => {
+  userSocketMap = userSocketMap.map(user =>
+    user.socketId === socket.id ? { ...user, typing: false } : user
+  );
+
+  const user = getUserBySocketId(socket.id);
+  if (!user) return;
+
+  const projectId = user.projectId;
+
+  try {
+    const objectId = new mongoose.Types.ObjectId(projectId);
+
+    // 1. Get previous file structure
+    const existing = await FileSystemItem.findOne({ projectId: objectId });
+
+    // 2. Update file structure
+    await FileSystemItem.findOneAndUpdate(
+      { projectId: objectId },
+      { $set: { fileStructure } },
+      { new: true, upsert: true }
+    );
+
+    // 3. Compare files
+    const compareFiles = (oldChildren: FileNode[] = [], newChildren: FileNode[] = []): {
+      fileId: string;
+      fileName: string;
+      previousContent: string;
+      newContent: string;
+    }[] => {
+      const changes = [];
+      const oldMap = new Map(oldChildren.map(f => [f.id, f]));
+
+      for (const newFile of newChildren) {
+        const oldFile = oldMap.get(newFile.id);
+
+        if (newFile.type === 'file' && (!oldFile || oldFile.content !== newFile.content)) {
+          changes.push({
+            fileId: newFile.id,
+            fileName: newFile.name,
+            previousContent: oldFile?.content || '',
+            newContent: newFile.content || '',
+          });
+        }
+
+        if (newFile.children?.length) {
+          const nested = compareFiles(oldFile?.children || [], newFile.children);
+          changes.push(...nested);
+        }
       }
-      return user;
+
+      return changes;
+    };
+
+    const changedFiles = compareFiles(
+      existing?.fileStructure?.children,
+      fileStructure.children
+    );
+
+    if (changedFiles.length === 0) return;
+
+    const fileIds = changedFiles.map(f => f.fileId);
+
+    // Get existing records for these files by this user in this session
+    const existingRecords = await FileEditHistory.find({
+      projectId,
+      userId,
+      fileId: { $in: fileIds },
+      // Optional: Add session-based filtering if you track editing sessions
+      // sessionId: currentSessionId 
+    }).sort({ editedAt: -1 });
+
+    // Create a map of existing records by fileId
+    const existingRecordMap = new Map();
+    existingRecords.forEach(record => {
+      if (!existingRecordMap.has(record.fileId)) {
+        existingRecordMap.set(record.fileId, record);
+      }
     });
-    const user = getUserBySocketId(socket.id);
-    if (!user) return;
-    const projectId = user.projectId;
-	try {
-      await FileSystemItem.findOneAndUpdate(
-        { projectId: new mongoose.Types.ObjectId(projectId) },
-        {
-          $set: {
-            fileStructure,
-          },
-        },
-        { new: true, upsert: true }
-      );
-    } catch (err) {
-      console.error("Error saving file structure:", err);
+
+    const operations = [];
+
+    for (const file of changedFiles) {
+      const existingRecord = existingRecordMap.get(file.fileId);
+
+      if (existingRecord) {
+        // Check if content actually changed
+        if (existingRecord.newContent === file.newContent) {
+          // No change in content, just update timestamp
+          operations.push({
+            updateOne: {
+              filter: { _id: existingRecord._id },
+              update: { 
+                $set: { 
+                  editedAt: new Date(),
+                  fileName: file.fileName // Update filename in case of rename
+                } 
+              }
+            }
+          });
+        } else {
+          // Update existing record with new content
+          // Keep the original previousContent from when editing started
+          operations.push({
+            updateOne: {
+              filter: { _id: existingRecord._id },
+              update: { 
+                $set: { 
+                  newContent: file.newContent, // Update with latest changes
+                  editedAt: new Date(),
+                  fileName: file.fileName,
+                  // previousContent stays the same (original state when editing started)
+                } 
+              }
+            }
+          });
+        }
+      } else {
+        // First time editing this file - create new record
+        operations.push({
+          insertOne: {
+            document: {
+              projectId,
+              userId,
+              fileId: file.fileId,
+              fileName: file.fileName,
+              previousContent: file.previousContent, // Original content when editing started
+              newContent: file.newContent,           // Current content
+              editedAt: new Date(),
+              createdAt: new Date(),
+              // Optional: Add session tracking
+              // sessionId: currentSessionId
+            }
+          }
+        });
+      }
     }
-    socket.broadcast.to(projectId).emit(SocketEvent.TYPING_PAUSE, { user });
-  });
+
+    // Execute all operations in a single batch
+    if (operations.length > 0) {
+      await FileEditHistory.bulkWrite(operations);
+    }
+
+  } catch (err) {
+    console.error('Error saving file structure or edit history:', err);
+  }
+
+  socket.broadcast.to(projectId).emit(SocketEvent.TYPING_PAUSE, { user });
+});
+
 
   socket.on(SocketEvent.REQUEST_DRAWING, () => {
     const projectId = getprojectId(socket.id);
@@ -306,6 +434,7 @@ app.use("/api/user", userRoute);
 app.use("/api/fileStructure",fileRoute)
 app.use("/api/chat",chatRoute)
 app.use("/api/task",taskRoute)
+app.use("/api/otp",otpRoute)
 
 app.get("/", (req: Request, res: Response) => {
   // Send the index.html file
