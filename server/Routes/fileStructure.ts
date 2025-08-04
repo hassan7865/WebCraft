@@ -22,7 +22,7 @@ router.get(
       });
 
       if (!fileSystemItem) {
-        next(throwError(404, "File structure not found"));
+        return
       }
 
       res.json({ fileStructure: fileSystemItem?.fileStructure });

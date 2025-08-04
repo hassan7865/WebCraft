@@ -1,4 +1,5 @@
 import { Project } from "@/types/project"
+import UserState from "@/utils/UserState"
 import moment from "moment"
 import Avatar from "react-avatar"
 import { FiClock, FiUsers, FiEdit2, FiTrash2 } from "react-icons/fi"
@@ -62,7 +63,8 @@ const ProjectCard: React.FC<{
                         </div>
 
                         {/* Edit & Delete Buttons */}
-                        <div className="flex items-center space-x-2">
+                        {project.createdBy.username == UserState.GetUserData().username &&
+                         <div className="flex items-center space-x-2">
                             <button
                                 onClick={() => onEdit(project)}
                                 className="p-1 text-blue-600 hover:text-blue-800"
@@ -78,6 +80,8 @@ const ProjectCard: React.FC<{
                                 <FiTrash2 />
                             </button>
                         </div>
+                        }
+                       
                     </div>
                 </div>
             </div>
@@ -96,7 +100,7 @@ const ProjectCard: React.FC<{
                         )}
                     </div>
 
-                    {/* Edit & Delete Buttons */}
+                     {project.createdBy.username == UserState.GetUserData().username &&
                     <div className="flex items-center space-x-2">
                         <button
                             onClick={() => onEdit(project)}
@@ -112,7 +116,7 @@ const ProjectCard: React.FC<{
                         >
                             <FiTrash2 />
                         </button>
-                    </div>
+                    </div>}
                 </div>
 
                 <div className="space-y-3">

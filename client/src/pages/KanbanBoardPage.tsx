@@ -6,6 +6,7 @@ import InviteUserDialog from "@/modal/InviteModal"
 import TaskFormDialog from "@/modal/TaskModal"
 import { Project } from "@/types/project"
 import { Task } from "@/types/task"
+import UserState from "@/utils/UserState"
 
 import React, { useState, useMemo, useEffect } from "react"
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
@@ -247,6 +248,7 @@ const KanbanBoard: React.FC = () => {
                                     Workspace
                                 </span>
                             </button>
+                             {project?.createdBy.username == UserState.GetUserData().username &&
                             <button
                                 onClick={() => setshowInvite(true)}
                                 className="flex items-center gap-2 rounded-xl px-4 py-2 font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl sm:px-5 sm:py-2.5"
@@ -268,7 +270,7 @@ const KanbanBoard: React.FC = () => {
                                 <span className="hidden sm:inline">
                                     Add Members
                                 </span>
-                            </button>
+                            </button>}
                             <button
                                 onClick={handleCreateTask}
                                 className="flex items-center gap-2 rounded-xl px-4 py-2 font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl sm:px-5 sm:py-2.5"

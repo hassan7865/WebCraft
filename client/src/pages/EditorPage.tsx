@@ -15,10 +15,10 @@ import { SocketEvent } from "@/types/socket"
 import { USER_STATUS, User } from "@/types/user"
 
 import UserState from "@/utils/UserState"
-import { getInitialFileStructure, setInitialFileStructure } from "@/utils/file"
+import { getInitialFileStructure } from "@/utils/file"
 import { useEffect, useState } from "react"
-import toast from "react-hot-toast"
-import { useLocation, useNavigate, useParams } from "react-router-dom"
+
+import { useLocation, useParams } from "react-router-dom"
 
 function EditorPage() {
     // Listen user online/offline status

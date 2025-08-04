@@ -125,7 +125,7 @@ const InviteUserDialog = ({
                                     as="h3"
                                     className="text-lg font-medium leading-6 text-gray-900"
                                 >
-                                    Invite User to Project
+                                    Add User to Project
                                 </Dialog.Title>
 
                                 <div className="mt-4">
@@ -240,10 +240,10 @@ const InviteUserDialog = ({
                                                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                                     ></path>
                                                 </svg>
-                                                Sending...
+                                                Adding...
                                             </>
                                         ) : (
-                                            "Send Invitation"
+                                            "Add Member"
                                         )}
                                     </button>
                                 </div>

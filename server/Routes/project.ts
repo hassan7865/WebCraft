@@ -201,7 +201,7 @@ router.get("/:projectId", async (req: Request, res: Response, next: NextFunction
     const { projectId } = req.params;
 
 
-    const project = await Project.findById(projectId);
+    const project = await Project.findById(projectId).populate("createdBy","username email");
 
     if (!project) {
       return next(throwError(404, "Project not found"));
