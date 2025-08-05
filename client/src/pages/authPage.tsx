@@ -307,8 +307,8 @@ const AuthPage = () => {
                                     value={otp}
                                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                     className="w-full rounded-lg border bg-slate-50 px-4 py-4"
-                                    placeholder="Enter the 6-digit OTP sent to your email"
-                                    maxLength={6}
+                                    placeholder="Enter the 4-digit OTP sent to your email"
+                                    maxLength={4}
                                     disabled={isLoading}
                                 />
                                 <p className="mt-2 text-sm text-slate-600">

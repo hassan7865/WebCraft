@@ -14,7 +14,7 @@ const Landing = () => {
             <Hero />
             <Features />
             <AboutUs/>
-            <Testimonial />
+            {/* <Testimonial /> */}
             <CallToAction />
             <Footer/>
            
