@@ -7,12 +7,9 @@ import useWindowDimensions from "@/hooks/useWindowDimensions"
 import { ACTIVITY_STATE } from "@/types/app"
 import { SocketEvent } from "@/types/socket"
 import { VIEWS } from "@/types/view"
-import { IoCodeSlash } from "react-icons/io5"
-import { MdOutlineDraw } from "react-icons/md"
 import cn from "classnames"
-import { Tooltip } from "react-tooltip"
 import { useState } from "react"
-import { tooltipStyles } from "./tooltipStyles"
+
 
 function Sidebar() {
     const {

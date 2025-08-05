@@ -16,8 +16,6 @@ function SettingsView() {
         setFontSize,
         fontFamily,
         setFontFamily,
-        showGitHubCorner,
-        setShowGitHubCorner,
         resetSettings,
     } = useSettings()
     const { viewHeight } = useResponsive()

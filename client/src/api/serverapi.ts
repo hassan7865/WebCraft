@@ -1,12 +1,12 @@
 import axios, {
-  AxiosResponse,
   AxiosError,
   InternalAxiosRequestConfig,
 } from "axios";
 import toast from "react-hot-toast";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000/api",
+  // baseURL: "http://localhost:3000/api",
+  baseURL:"https://webcraft-server-production.up.railway.app/api",
   headers: {
     "Content-Type": "application/json",
   },

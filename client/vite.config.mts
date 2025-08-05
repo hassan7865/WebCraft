@@ -8,6 +8,7 @@ export default defineConfig({
     build: {
         chunkSizeWarningLimit: 1600,
         rollupOptions: {
+            // ✅ Removed `external` to ensure core-js-pure and others are bundled
             output: {
                 manualChunks(id) {
                     if (id.includes("node_modules")) {
@@ -30,9 +31,12 @@ export default defineConfig({
         ],
     },
     preview: {
+        port: 5173,
+        host: '0.0.0.0'
+    },
+    server: {
+        open: true,
+        host: '0.0.0.0',
         port: 5173
     },
-    server:{
-        open: true,
-    }
 })

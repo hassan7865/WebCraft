@@ -1,7 +1,8 @@
 import React, { useState } from "react"
 import Avatar from "react-avatar"
-import { FiChevronDown, FiLogOut, FiCamera, FiClock } from "react-icons/fi"
+import { FiChevronDown, FiLogOut, FiClock } from "react-icons/fi"
 import FileEditHistoryComponent from "../history/historyComponent"
+import { Link } from "react-router-dom"
 
 interface NavbarProps {
     userName?: string
@@ -29,26 +30,27 @@ const NavbarComponent: React.FC<NavbarProps> = ({
     return (
         <>
             <nav
-                className={`sticky top-0 z-50 border-b border-gray-200 bg-white bg-white/95 backdrop-blur-sm ${className}`}
+                className={`sticky top-0 z-[100] border-b border-gray-200 bg-white bg-white/95 backdrop-blur-sm ${className}`}
             >
-                <div className="mx-auto max-w-7xl px-6">
+                <div className="mx-auto px-6">
                     <div className="flex h-16 items-center justify-between">
-                        {/* Logo Section */}
-                        <div className="flex items-center space-x-4">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-lg">
-                                <span className="text-sm font-bold text-white">
-                                    {"{W}"}
-                                </span>
+                        <Link to="/dashboard">
+                            <div className="flex items-center space-x-4">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-lg">
+                                    <span className="text-sm font-bold text-white">
+                                        {"{W}"}
+                                    </span>
+                                </div>
+                                <div className="hidden sm:block">
+                                    <h1 className="text-xl font-bold text-gray-900">
+                                        WebCraft
+                                    </h1>
+                                    <p className="-mt-1 text-xs text-gray-500">
+                                        Dashboard
+                                    </p>
+                                </div>
                             </div>
-                            <div className="hidden sm:block">
-                                <h1 className="text-xl font-bold text-gray-900">
-                                    WebCraft
-                                </h1>
-                                <p className="-mt-1 text-xs text-gray-500">
-                                    Dashboard
-                                </p>
-                            </div>
-                        </div>
+                        </Link>
 
                         {/* Right Section */}
                         <div className="flex items-center space-x-4">
@@ -70,7 +72,6 @@ const NavbarComponent: React.FC<NavbarProps> = ({
 
                                     {isHistoryOpen && (
                                         <FileEditHistoryComponent
-                                            
                                             onClose={() =>
                                                 setisHistoryOpen(false)
                                             }

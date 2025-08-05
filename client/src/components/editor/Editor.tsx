@@ -1,4 +1,4 @@
-import AppContext, { useAppContext } from "@/context/AppContext"
+import  { useAppContext } from "@/context/AppContext"
 import { useFileSystem } from "@/context/FileContext"
 import { useSettings } from "@/context/SettingContext"
 import { useSocket } from "@/context/SocketContext"
@@ -18,13 +18,11 @@ import CodeMirror, {
 import { useEffect, useMemo, useState } from "react"
 import toast from "react-hot-toast"
 import { cursorTooltipBaseTheme, tooltipField } from "./tooltip"
-import { USER_STATUS } from "@/types/user"
 import { useLocation } from "react-router-dom"
 import UserState from "@/utils/UserState"
 
 function Editor() {
-    const { users, currentUser, setStatus } = useAppContext()
-    const location = useLocation()
+    const { users, currentUser } = useAppContext()
     const { activeFile, setActiveFile, fileStructure, setFileStructure } =
         useFileSystem()
     const { theme, language, fontSize } = useSettings()
