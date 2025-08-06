@@ -10,6 +10,7 @@ import {
     FiClipboard,
     FiPlus,
     FiLoader,
+    FiChevronDown,
 } from "react-icons/fi"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
@@ -24,7 +25,7 @@ export interface TaskFormData {
     status: "todo" | "inprogress" | "review" | "done"
     summary: string
     priority: "Low" | "Normal" | "High" | "Critical"
-    assignee: string
+    assignees: string[] // Changed from assignee to assignees array
     reporter: string
     dueDate?: Date | null
     tags?: string[]
@@ -52,6 +53,7 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
 }) => {
     const [newTag, setNewTag] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isAssigneeDropdownOpen, setIsAssigneeDropdownOpen] = useState(false)
 
     const {
         register,
@@ -67,16 +69,17 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
             status: task?.status || "todo",
             summary: task?.summary || "",
             priority: task?.priority || "Normal",
-            assignee: task?.assignee?._id || null, // Extract _id from nested assignee object
+            assignees: task?.assignees?.map(a => typeof a === 'string' ? a : a._id) || [],
             dueDate: task?.dueDate ? new Date(task.dueDate) : null,
             tags: task?.tags || [],
             progress: task?.progress || 0,
         },
     })
 
-    // Watch progress and tags for dynamic updates
+    // Watch progress, tags, and assignees for dynamic updates
     const progress = watch("progress")
     const tags = watch("tags") || []
+    const assignees = watch("assignees") || []
 
     // Reset form when task changes
     React.useEffect(() => {
@@ -86,7 +89,7 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
                 status: task.status,
                 summary: task.summary,
                 priority: task.priority,
-                assignee: task.assignee?._id || null, // Extract _id from nested assignee object
+                assignees: task.assignees?.map(a => typeof a === 'string' ? a : a._id) || [],
                 dueDate: task.dueDate ? new Date(task.dueDate) : null,
                 tags: task.tags || [],
                 progress: task.progress || 0,
@@ -97,7 +100,7 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
                 status: "todo",
                 summary: "",
                 priority: "Normal",
-                assignee: null,
+                assignees: [],
                 dueDate: null,
                 tags: [],
                 progress: 0,
@@ -146,6 +149,30 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
             e.preventDefault()
             addTag()
         }
+    }
+
+    // Assignee handling functions
+    const toggleAssignee = (memberId: string) => {
+        const currentAssignees = assignees || []
+        const isAssigned = currentAssignees.includes(memberId)
+        
+        if (isAssigned) {
+            setValue("assignees", currentAssignees.filter(id => id !== memberId))
+        } else {
+            setValue("assignees", [...currentAssignees, memberId])
+        }
+    }
+
+    const removeAssignee = (memberId: string) => {
+        setValue("assignees", assignees.filter(id => id !== memberId))
+    }
+
+    const getAssignedMembers = () => {
+        return teamMembers.filter(member => assignees.includes(member._id))
+    }
+
+    const getUnassignedMembers = () => {
+        return teamMembers.filter(member => !assignees.includes(member._id))
     }
 
     const statusOptions = [
@@ -316,68 +343,149 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
                                     )}
                                 />
                             </div>
+                        </div>
 
-                            {/* Assignee */}
-                            <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-700">
-                                    Assignee
-                                </label>
-                                <div className="relative">
-                                    <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400" />
-                                    <Controller
-                                        name="assignee"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <select
-                                                {...field}
+                        {/* Multiple Assignees */}
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">
+                                Assignees ({assignees.length} selected)
+                            </label>
+
+                            {/* Selected assignees display */}
+                            {assignees.length > 0 && (
+                                <div className="mb-3 flex flex-wrap gap-2">
+                                    {getAssignedMembers().map((member) => (
+                                        <span
+                                            key={member._id}
+                                            className="inline-flex items-center rounded-full border border-[#00B8E9]/20 bg-[#00B8E9]/10 px-3 py-1 text-sm text-[#00B8E9]"
+                                        >
+                                            <Avatar
+                                                size="20"
+                                                textSizeRatio={2.5}
+                                                round
+                                                name={member.username}
+                                                className="mr-2"
+                                            />
+                                            {member.username}
+                                            <button
+                                                type="button"
+                                                onClick={() => removeAssignee(member._id)}
                                                 disabled={isSubmitting}
-                                                className="w-full appearance-none rounded-lg border border-gray-300 py-3 pl-10 pr-4 transition-colors focus:border-transparent focus:ring-2 focus:ring-[#00B8E9] disabled:cursor-not-allowed disabled:bg-gray-100"
+                                                className="ml-2 text-[#00B8E9] hover:text-[#0099c7] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                             >
-                                                <option value={null}>
-                                                    Unassigned
-                                                </option>
-                                                {teamMembers.map((member) => (
-                                                    <option
-                                                        key={member._id}
-                                                        value={member._id}
-                                                    >
-                                                        {member.username}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        )}
-                                    />
+                                                <FiX className="h-3 w-3" />
+                                            </button>
+                                        </span>
+                                    ))}
                                 </div>
+                            )}
+
+                            {/* Assignee dropdown */}
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsAssigneeDropdownOpen(!isAssigneeDropdownOpen)}
+                                    disabled={isSubmitting}
+                                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-left transition-colors focus:border-transparent focus:ring-2 focus:ring-[#00B8E9] disabled:cursor-not-allowed disabled:bg-gray-100 flex items-center justify-between"
+                                >
+                                    <div className="flex items-center">
+                                        <FiUser className="mr-2 text-gray-400" />
+                                        <span className="text-gray-500">
+                                            {assignees.length === 0 
+                                                ? "Select assignees..." 
+                                                : `${assignees.length} member${assignees.length !== 1 ? 's' : ''} selected`
+                                            }
+                                        </span>
+                                    </div>
+                                    <FiChevronDown 
+                                        className={`h-4 w-4 text-gray-400 transition-transform ${
+                                            isAssigneeDropdownOpen ? 'rotate-180' : ''
+                                        }`} 
+                                    />
+                                </button>
+
+                                {isAssigneeDropdownOpen && (
+                                    <div className="absolute z-[50] mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg max-h-60 overflow-y-auto">
+                                        {teamMembers.length === 0 ? (
+                                            <div className="px-4 py-3 text-sm text-gray-500">
+                                                No team members available
+                                            </div>
+                                        ) : (
+                                            teamMembers.map((member) => {
+                                                const isSelected = assignees.includes(member._id)
+                                                return (
+                                                    <button
+                                                        key={member._id}
+                                                        type="button"
+                                                        onClick={() => toggleAssignee(member._id)}
+                                                        disabled={isSubmitting}
+                                                        className={`w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-between ${
+                                                            isSelected ? 'bg-[#00B8E9]/5 text-[#00B8E9]' : 'text-gray-700'
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-center">
+                                                            <Avatar
+                                                                size="24"
+                                                                textSizeRatio={2.5}
+                                                                round
+                                                                name={member.username}
+                                                                className="mr-3"
+                                                            />
+                                                            <span className="text-sm">
+                                                                {member.username}
+                                                            </span>
+                                                        </div>
+                                                        {isSelected && (
+                                                            <div className="w-4 h-4 bg-[#00B8E9] rounded-full flex items-center justify-center">
+                                                                <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                </svg>
+                                                            </div>
+                                                        )}
+                                                    </button>
+                                                )
+                                            })
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Due Date */}
-                            <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-700">
-                                    Due Date
-                                </label>
-                                <div className="relative">
-                                    <FiCalendar className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-gray-400" />
-                                    <Controller
-                                        name="dueDate"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <DatePicker
-                                                selected={field.value}
-                                                onChange={(date: Date | null) =>
-                                                    field.onChange(date)
-                                                }
-                                                placeholderText="Select due date"
-                                                disabled={isSubmitting}
-                                                className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 transition-colors focus:border-transparent focus:ring-2 focus:ring-[#00B8E9] disabled:cursor-not-allowed disabled:bg-gray-100"
-                                                isClearable
-                                                dateFormat="MMMM d, yyyy"
-                                                minDate={new Date()}
-                                                popperClassName="react-datepicker-popper"
-                                                wrapperClassName="w-full"
-                                            />
-                                        )}
-                                    />
-                                </div>
+                            {/* Click outside handler */}
+                            {isAssigneeDropdownOpen && (
+                                <div 
+                                    className="fixed inset-0 z-0" 
+                                    onClick={() => setIsAssigneeDropdownOpen(false)}
+                                />
+                            )}
+                        </div>
+
+                        {/* Due Date */}
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">
+                                Due Date
+                            </label>
+                            <div className="relative">
+                                <FiCalendar className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-gray-400" />
+                                <Controller
+                                    name="dueDate"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <DatePicker
+                                            selected={field.value}
+                                            onChange={(date: Date | null) =>
+                                                field.onChange(date)
+                                            }
+                                            placeholderText="Select due date"
+                                            disabled={isSubmitting}
+                                            className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 transition-colors focus:border-transparent focus:ring-2 focus:ring-[#00B8E9] disabled:cursor-not-allowed disabled:bg-gray-100"
+                                            isClearable
+                                            dateFormat="MMMM d, yyyy"
+                                            minDate={new Date()}
+                                            popperClassName="react-datepicker-popper"
+                                            wrapperClassName="w-full"
+                                        />
+                                    )}
+                                />
                             </div>
                         </div>
 

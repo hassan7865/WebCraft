@@ -5,6 +5,7 @@ enum VIEWS {
     RUN = "RUN",
     COPILOT = "COPILOT",
     SETTINGS = "SETTINGS",
+    
 }
 
 interface ViewContext {

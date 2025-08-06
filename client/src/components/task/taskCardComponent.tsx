@@ -1,6 +1,6 @@
 import { Task } from "@/types/task"
 import Avatar from "react-avatar"
-import { FiCalendar, FiUser, FiEdit, FiTrash2 } from "react-icons/fi"
+import { FiCalendar, FiUser, FiEdit, FiTrash2, FiUsers } from "react-icons/fi"
 
 const CardTemplate = (props: any) => {
     const getPriorityColor = (priority: string) => {
@@ -21,6 +21,18 @@ const CardTemplate = (props: any) => {
     const task = props.task as Task
     const onEdit = props.onEdit
     const onDelete = props.onDelete
+
+    // Helper function to get assignees array (handles both old single assignee and new multiple assignees)
+    const getAssignees = () => {
+        // If task has assignees array (new format)
+        if (task.assignees && Array.isArray(task.assignees)) {
+            return task.assignees
+        }
+       
+        return []
+    }
+
+    const assignees = getAssignees()
 
     return (
         <div className="kanban-card m-2 rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow duration-200 hover:shadow-md">
@@ -82,22 +94,71 @@ const CardTemplate = (props: any) => {
             )}
 
             <div className="mb-3 flex items-center justify-between text-xs text-gray-500">
+                {/* Multiple Assignees Section */}
                 <div className="flex items-center gap-1">
-                    {task.assignee ? (
-                        <>
-                            <Avatar
-                                size="32"
-                                textSizeRatio={2}
-                                round
-                                name={task.assignee?.username || "User"}
-                            />
-                            <span>{task.assignee.username}</span>
-                        </>
-                    ) : (
+                    {assignees.length === 0 ? (
+                        // No assignees
                         <>
                             <FiUser className="h-4 w-4" />
                             <span>Unassigned</span>
                         </>
+                    ) : assignees.length === 1 ? (
+                        // Single assignee
+                        <>
+                            <Avatar
+                                size="24"
+                                textSizeRatio={2.5}
+                                round
+                                name={assignees[0]?.username || "User"}
+                            />
+                            <span className="ml-1">{assignees[0]?.username || "Unknown"}</span>
+                        </>
+                    ) : assignees.length <= 3 ? (
+                        // Multiple assignees (up to 3) - show all avatars
+                        <div className="flex items-center">
+                            <div className="flex -space-x-1">
+                                {assignees.map((assignee, index) => (
+                                    <Avatar
+                                        key={assignee?._id || index}
+                                        size="20"
+                                        textSizeRatio={2.5}
+                                        round
+                                        name={assignee?.username || "User"}
+                                        className="border border-white"
+                                        title={assignee?.username || "Unknown"}
+                                    />
+                                ))}
+                            </div>
+                            <div className="ml-2 flex items-center gap-1">
+                                <FiUsers className="h-3 w-3" />
+                                <span>{assignees.length} assigned</span>
+                            </div>
+                        </div>
+                    ) : (
+                        // More than 3 assignees - show first 2 + counter
+                        <div className="flex items-center">
+                            <div className="flex -space-x-1">
+                                {assignees.slice(0, 2).map((assignee, index) => (
+                                    <Avatar
+                                        key={assignee?._id || index}
+                                        size="20"
+                                        textSizeRatio={2.5}
+                                        round
+                                        name={assignee?.username || "User"}
+                                        className="border border-white"
+                                        title={assignee?.username || "Unknown"}
+                                    />
+                                ))}
+                                {/* Counter badge */}
+                                <div className="flex h-5 w-5 items-center justify-center rounded-full border border-white bg-gray-100 text-xs font-medium text-gray-600">
+                                    +{assignees.length - 2}
+                                </div>
+                            </div>
+                            <div className="ml-2 flex items-center gap-1">
+                                <FiUsers className="h-3 w-3" />
+                                <span>{assignees.length} assigned</span>
+                            </div>
+                        </div>
                     )}
                 </div>
 

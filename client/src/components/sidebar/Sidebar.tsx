@@ -9,6 +9,9 @@ import { SocketEvent } from "@/types/socket"
 import { VIEWS } from "@/types/view"
 import cn from "classnames"
 import { useState } from "react"
+import { FiClock } from "react-icons/fi"
+import FileEditHistoryComponent from "../history/historyComponent"
+
 
 
 function Sidebar() {
@@ -24,6 +27,7 @@ function Sidebar() {
     const { socket } = useSocket()
     const { isMobile } = useWindowDimensions()
     const [showTooltip, setShowTooltip] = useState(true)
+     const [isHistoryOpen, setisHistoryOpen] = useState(false)
 
     const changeState = () => {
         setShowTooltip(false)
@@ -40,7 +44,9 @@ function Sidebar() {
     }
 
     return (
-        <aside className="flex w-full md:h-full md:max-h-full md:min-h-full md:w-auto">
+        <>
+         <aside className="flex w-full md:h-full md:max-h-full md:min-h-full md:w-auto">
+           
             <div
                 className={cn(
                     "fixed bottom-0 left-0 z-50 flex h-[50px] w-full gap-4 self-end overflow-hidden border-t border-lightHover bg-light text-dark p-2 md:static md:h-full md:w-[50px] md:min-w-[50px] md:flex-col md:border-r md:border-t-0 md:p-2 md:pt-4",
@@ -69,7 +75,14 @@ function Sidebar() {
                     viewName={VIEWS.SETTINGS}
                     icon={viewIcons[VIEWS.SETTINGS]}
                 />
+
+        
+
+                <div  className="flex items-center justify-center">
+                    <FiClock onClick={()=>setisHistoryOpen(true)} className="h-7 w-7 text-gray-800 cursor-pointer"/>
+                </div>
             </div>
+            
             <div
                 className="absolute left-0 top-0 z-20 w-full flex-col bg-light text-dark md:static md:min-w-[300px]"
                 style={isSidebarOpen ? {} : { display: "none" }}
@@ -78,6 +91,16 @@ function Sidebar() {
                 {viewComponents[activeView]}
             </div>
         </aside>
+
+         {isHistoryOpen && (
+                                        <FileEditHistoryComponent
+                                            onClose={() =>
+                                                setisHistoryOpen(false)
+                                            }
+                                        />
+                                    )}
+        </>
+       
     )
 }
 

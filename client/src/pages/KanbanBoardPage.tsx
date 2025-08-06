@@ -54,6 +54,7 @@ const KanbanBoard: React.FC = () => {
             const res = await api.get(`/project/${projectId}`)
             setproject(res.data.project)
             setassignees(res.data.assignees)
+            
         } catch {
         } finally {
             setLoading(false)
@@ -78,20 +79,48 @@ const KanbanBoard: React.FC = () => {
 
     const navigate = useNavigate()
 
+   
+    const getTaskAssignees = (task: Task) => {
+        // New format: multiple assignees
+        if (task.assignees && Array.isArray(task.assignees)) {
+            return task.assignees
+        }
+       
+        return []
+    }
+
+    // Helper function to check if task matches assignee filter
+    const taskMatchesAssigneeFilter = (task: Task, filterValue: string) => {
+        if (filterValue === "all") return true
+        
+        const taskAssignees = getTaskAssignees(task)
+        
+        // Check if any of the task's assignees match the filter
+        return taskAssignees.some(assignee => assignee?.username === filterValue)
+    }
+
+    // Helper function to check if task matches search term
+    const taskMatchesSearch = (task: Task, searchTerm: string) => {
+        const lowerSearchTerm = searchTerm.toLowerCase()
+        
+        // Search in title and summary
+        const matchesTitle = task.title.toLowerCase().includes(lowerSearchTerm)
+        const matchesSummary = task.summary.toLowerCase().includes(lowerSearchTerm)
+        
+        // Search in assignees
+        const taskAssignees = getTaskAssignees(task)
+        const matchesAssignee = taskAssignees.some(assignee => 
+            assignee?.username.toLowerCase().includes(lowerSearchTerm)
+        )
+        
+        return matchesTitle || matchesSummary || matchesAssignee
+    }
+
     const filteredTasks = useMemo(() => {
         return tasks.filter((task) => {
-            const matchesSearch =
-                task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                task.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                task.assignee?.username
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase())
-
-            const matchesPriority =
-                filterPriority == "all" || task.priority == filterPriority
-            const matchesAssignee =
-                filterAssignee == "all" ||
-                task.assignee?.username == filterAssignee
+            const matchesSearch = taskMatchesSearch(task, searchTerm)
+            const matchesPriority = filterPriority === "all" || task.priority === filterPriority
+            const matchesAssignee = taskMatchesAssigneeFilter(task, filterAssignee)
 
             return matchesSearch && matchesPriority && matchesAssignee
         })
@@ -120,7 +149,7 @@ const KanbanBoard: React.FC = () => {
         const inProgress = tasks.filter((t) => t.status === "inprogress").length
         const done = tasks.filter((t) => t.status === "done").length
         const avgProgress =
-            tasks.reduce((sum, t) => sum + (t.progress || 0), 0) / total
+            total > 0 ? tasks.reduce((sum, t) => sum + (t.progress || 0), 0) / total : 0
 
         return {
             total,
@@ -131,8 +160,15 @@ const KanbanBoard: React.FC = () => {
         }
     }, [tasks])
 
+    // Use project assignees for filter dropdown instead of task assignees
+    const uniqueAssignees = useMemo(() => {
+        // Return sorted project assignees
+        return assignees.sort((a, b) => a.username.localeCompare(b.username))
+    }, [assignees])
+
     const handleCreateTask = () => {
         setmode("create")
+        setselectedTask(null)
         setshowTaskDialog(true)
     }
 
@@ -149,7 +185,7 @@ const KanbanBoard: React.FC = () => {
     const handleDelete = async (task: Task) => {
         const isConfirmed = await showConfirmationToast({
             title: "Delete Confirmation",
-            message: `Are you sure you want to delete this task This action cannot be undone.`,
+            message: `Are you sure you want to delete this task? This action cannot be undone.`,
             variant: "danger",
             confirmText: "Yes, Delete",
             cancelText: "Cancel",
@@ -165,6 +201,7 @@ const KanbanBoard: React.FC = () => {
             toast.success(`Task deleted successfully`)
             fetchTasks()
         } catch (error) {
+            toast.error("Failed to delete task")
         } finally {
             setLoading(false)
             toast.dismiss(toastId)
@@ -221,7 +258,7 @@ const KanbanBoard: React.FC = () => {
     }
 
     if (Loading) {
-        ;<Loader />
+        return <Loader />
     }
 
     return (
@@ -253,7 +290,7 @@ const KanbanBoard: React.FC = () => {
                                         Workspace
                                     </span>
                                 </button>
-                                {project?.createdBy.username ==
+                                {project?.createdBy.username ===
                                     UserState.GetUserData().username && (
                                     <button
                                         onClick={() => setshowInvite(true)}
@@ -460,9 +497,9 @@ const KanbanBoard: React.FC = () => {
                                         <option value="all">
                                             All Assignees
                                         </option>
-                                        {assignees.map((assignee) => (
+                                        {uniqueAssignees.map((assignee) => (
                                             <option
-                                                key={assignee.username}
+                                                key={assignee._id}
                                                 value={assignee.username}
                                             >
                                                 {assignee.username}
@@ -499,6 +536,9 @@ const KanbanBoard: React.FC = () => {
                                                         {statusLabels[column.id]
                                                             ?.label ||
                                                             column.title}
+                                                    </span>
+                                                    <span className="ml-auto text-xs text-gray-500">
+                                                        {tasksByStatus[column.id]?.length || 0}
                                                     </span>
                                                 </h3>
                                                 <div className="space-y-2">
@@ -557,7 +597,8 @@ const KanbanBoard: React.FC = () => {
                     reloadTasks={fetchTasks}
                     onClose={() => setshowTaskDialog(false)}
                     teamMembers={assignees}
-                    task={mode == "edit" ? selectedTask : null}
+                
+                    task={mode === "edit" ? selectedTask : null}
                 />
             </div>
         </>

@@ -14,7 +14,7 @@ router.post("/save", async (req: Request, res: Response, next: NextFunction) => 
       status,
       summary,
       priority,
-      assignee,
+      assignees,
       dueDate,
       tags,
       progress,
@@ -34,7 +34,7 @@ router.post("/save", async (req: Request, res: Response, next: NextFunction) => 
         status,
         summary,
         priority,
-        assignee,
+        assignees,
         dueDate,
         tags,
         progress,
@@ -60,7 +60,7 @@ router.post("/save", async (req: Request, res: Response, next: NextFunction) => 
     if (status !== undefined) updateData.status = status;
     if (summary !== undefined) updateData.summary = summary;
     if (priority !== undefined) updateData.priority = priority;
-    if (assignee !== undefined) updateData.assignee = assignee;
+    if (assignees !== undefined) updateData.assignees = assignees;
     if(reporter!== undefined) updateData.reporter = reporter
     if (dueDate !== undefined) updateData.dueDate = dueDate;
     if (tags !== undefined) updateData.tags = tags;
@@ -93,7 +93,7 @@ router.get(
       const { projectId } = req.params;
 
       const tasks = await Task.find({ project: projectId }).populate(
-        "assignee",
+        "assignees",
         "username"
       ).populate("reporter","username");
 
@@ -110,7 +110,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { projectId } = req.params;
-      const tasks = await Task.find({ project: projectId }).populate("assignee","_id username").populate("reporter","_id username");
+      const tasks = await Task.find({ project: projectId }).populate("assignees","_id username").populate("reporter","_id username");
 
       res.status(200).json(tasks);
     } catch (error) {

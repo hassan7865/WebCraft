@@ -40,7 +40,7 @@ const FileEditHistoryComponent = ({ onClose }) => {
 
     return (
         <>
-            <div className="animate-in slide-in-from-top-2 absolute right-0 z-50 mt-2 max-h-96 w-80 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl duration-200">
+            <div className="animate-in slide-in-from-top-2 absolute top-0 left-0 z-50 mt-2 max-h-96 w-80 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl duration-200">
                 {/* Header */}
                 <div className="border-b border-gray-100 px-4 py-3">
                     <div className="flex items-center justify-between">

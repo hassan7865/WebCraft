@@ -5,7 +5,7 @@ export interface ITask extends Document {
   status: "todo" | "inprogress" | "review" | "done";
   summary: string;
   priority: "Low" | "Normal" | "High" | "Critical";
-  assignee?: Types.ObjectId | null;
+  assignees?: Types.ObjectId[];
   reporter:Types.ObjectId;
   dueDate?: Date;
   tags?: string[];
@@ -31,9 +31,10 @@ const TaskSchema: Schema<ITask> = new Schema(
       default: "Normal",
       required: true,
     },
-    assignee: {
-      type: mongoose.Schema.Types.ObjectId,
+    assignees: { // Changed to an array of ObjectIds
+      type: [mongoose.Schema.Types.ObjectId],
       ref: "User",
+      default: [],
     },
     reporter: {
       type: mongoose.Schema.Types.ObjectId,

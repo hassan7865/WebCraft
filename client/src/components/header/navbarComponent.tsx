@@ -56,29 +56,7 @@ const NavbarComponent: React.FC<NavbarProps> = ({
                         <div className="flex items-center space-x-4">
                             {/* User Dropdown */}
 
-                            {location.pathname.includes("editor") && (
-                                <div className="relative">
-                                    <button
-                                        onClick={() =>
-                                            setisHistoryOpen(!isHistoryOpen)
-                                        }
-                                        className="group flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-100 hover:text-gray-900"
-                                    >
-                                        <FiClock className="h-4 w-4" />
-                                        <span className="hidden md:inline">
-                                            File History
-                                        </span>
-                                    </button>
-
-                                    {isHistoryOpen && (
-                                        <FileEditHistoryComponent
-                                            onClose={() =>
-                                                setisHistoryOpen(false)
-                                            }
-                                        />
-                                    )}
-                                </div>
-                            )}
+                           
 
                             <div className="relative">
                                 <button
