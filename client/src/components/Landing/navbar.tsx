@@ -6,7 +6,7 @@ const Navbar = () => {
   const [toggleMenu, setToggleMenu] = useState(false);
 
   return (
-    <nav className="relative z-50 container mx-auto p-6">
+    <nav id="navbar" className="relative z-50 container mx-auto p-6">
       {/* Flex Container */}
       <div className="flex items-center justify-between">
         {/* Logo */}

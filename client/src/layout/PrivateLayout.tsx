@@ -1,4 +1,3 @@
-import HeaderComponent from "@/components/header/headerComponent"
 import UserState from "@/utils/UserState"
 import { Navigate, Outlet } from "react-router-dom"
 
@@ -8,7 +7,7 @@ const PrivateRoute = () => {
 
     return currentUser ? (
         <>
-            <HeaderComponent />
+            
             <Outlet />
         </>
     ) : (

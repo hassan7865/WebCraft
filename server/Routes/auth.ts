@@ -140,5 +140,33 @@ route.post("/validate-credentials", async (req: Request, res: Response, next: Ne
 });
 
 
+route.post("/forget-password", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+      return next(throwError(400, "Email and new password are required"));
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return next(throwError(404, "User not found with this email"));
+    }
+
+    // Hash and update the password
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password has been updated successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+
 
 export default route;

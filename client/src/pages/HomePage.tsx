@@ -1,5 +1,6 @@
 import api from "@/api/serverapi"
 import { showConfirmationToast } from "@/components/confirmation/showConfirmationDialog"
+import HeaderComponent from "@/components/header/headerComponent"
 import Loader from "@/components/loader/loaderComponent"
 import ProjectCard from "@/components/project/projectCard"
 import ProjectFormDialog, { ProjectFormData } from "@/modal/ProjectModal"
@@ -147,6 +148,7 @@ const Home: React.FC = () => {
 
     return (
         <>
+        <HeaderComponent/>
             {IsLoading ? (
                 <Loader />
             ) : (
